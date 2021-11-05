@@ -17,12 +17,6 @@ class HomePage extends StatelessWidget {
                 fontSize: 40,
               ),
             ),
-            const TextField(
-
-            ),
-            const TextField(
-
-            ),
             Container(
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.all(Radius.circular(20),),
@@ -32,7 +26,7 @@ class HomePage extends StatelessWidget {
               height: 70,
               child: const Center(
                 child: Text(
-                  "login",
+                  "Get Start",
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: 30,

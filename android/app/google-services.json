@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "969783675320",
+    "project_id": "group-chats-72217",
+    "storage_bucket": "group-chats-72217.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:969783675320:android:dac783a7f7b6bf919ce74d",
+        "android_client_info": {
+          "package_name": "com.example.group_chat_flutter"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "969783675320-sprej669hkt7i72qkbeqecoru0jmlrki.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAx_s7_lAqxvcDEbh8FGm_Xb9nZLVICt94"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "969783675320-sprej669hkt7i72qkbeqecoru0jmlrki.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
