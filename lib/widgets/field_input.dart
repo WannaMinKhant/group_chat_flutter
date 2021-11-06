@@ -20,7 +20,6 @@ class Field extends StatefulWidget {
 
 class _FieldState extends State<Field> {
   bool _show = false;
-  bool isValid = false;
 
   @override
   Widget build(BuildContext context) {

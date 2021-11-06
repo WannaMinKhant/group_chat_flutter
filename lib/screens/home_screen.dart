@@ -1,14 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:group_chat_flutter/controller/account.dart';
 
-class HomePage extends StatelessWidget {
-  const HomePage({Key? key}) : super(key: key);
+class HomeScreen extends StatelessWidget {
+  const HomeScreen({Key? key}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(),
       body: Center(
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Text(
               "Welcome From My Chat",
@@ -19,20 +20,25 @@ class HomePage extends StatelessWidget {
             ),
             Container(
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.all(Radius.circular(20),),
+                borderRadius: const BorderRadius.all(
+                  Radius.circular(20),
+                ),
                 color: Colors.green[200],
               ),
               width: 200,
               height: 70,
               child: const Center(
-                child: Text(
-                  "Get Start",
-                  style: TextStyle(
-                    fontWeight: FontWeight.w500,
-                    fontSize: 30,
-                  ),
-                )
-              ),
+                  child: Text(
+                "Get Start",
+                style: TextStyle(
+                  fontWeight: FontWeight.w500,
+                  fontSize: 30,
+                ),
+              )),
+            ),
+            TextButton(
+              onPressed: () => logOut(context),
+              child: const Text("Logout"),
             ),
           ],
         ),
