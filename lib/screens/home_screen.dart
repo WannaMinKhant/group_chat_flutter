@@ -1,6 +1,8 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:group_chat_flutter/controller/account.dart';
+import 'package:group_chat_flutter/screens/chat_room.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -9,13 +11,61 @@ class HomeScreen extends StatefulWidget {
   State<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends State<HomeScreen> {
+class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   bool isLoading = false;
   Map<String, dynamic> userMap = <String, dynamic>{};
   final TextEditingController _search = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance!.addObserver(this);
+    setStatus("Online");
+    print("Online");
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance!.removeObserver(this);
+    super.dispose();
+  }
+
+  late AppLifecycleState _notification;
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    setState(() {
+      _notification = state;
+    });
+    if (_notification == AppLifecycleState.resumed) {
+      setStatus("Online");
+      print("Online");
+    } else {
+      setStatus("Offline");
+      print("Offline");
+    }
+  }
+
+  void setStatus(String status) async {
+    await _firestore.collection('user').doc(_auth.currentUser!.uid).update({
+      "status": status,
+    });
+  }
+
+  String chatRoomId(String user1, String user2) {
+    print(user1);
+    print(user2);
+    if (user1[0].toLowerCase().codeUnits[0] >
+        user2.toLowerCase().codeUnits[0]) {
+      return "$user1$user2";
+    } else {
+      return "$user2$user1";
+    }
+  }
 
   void onSearch() async {
-    FirebaseFirestore _firestore = FirebaseFirestore.instance;
     setState(() {
       isLoading = true;
     });
@@ -28,20 +78,25 @@ class _HomeScreenState extends State<HomeScreen> {
         userMap = value.docs[0].data();
         isLoading = false;
       });
-      print(userMap);
+      // print(userMap);
     });
   }
 
   @override
   Widget build(BuildContext context) {
     Size size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(
         title: const Text("Home Screen"),
         centerTitle: false,
+        automaticallyImplyLeading: false,
         actions: [
           IconButton(
-            onPressed: () => logOut(context),
+            onPressed: () {
+              setStatus("Offline");
+              logOut(context);
+            },
             icon: const Icon(Icons.logout),
           ),
         ],
@@ -92,7 +147,17 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
                 userMap.isNotEmpty
                     ? ListTile(
-                        onTap: () {},
+                        onTap: () {
+                          String roomId = chatRoomId(
+                              _auth.currentUser!.displayName.toString(),
+                              userMap['name']);
+                          print(roomId);
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => ChatRoom(
+                                    chatRoomId: roomId,
+                                    userMap: userMap,
+                                  )));
+                        },
                         leading: const Icon(
                           Icons.person,
                           size: 45,

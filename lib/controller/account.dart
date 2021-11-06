@@ -14,11 +14,13 @@ Future<User?> createAccount(String name, String email, String password) async {
         .user;
     if (user != null) {
       // print("Login Successfully");
-
+      
+      user.updateDisplayName(name);
       await _firestore.collection('user').doc(_auth.currentUser!.uid).set({
         "name" : name,
         "email" : email,
         "status" : "Unavailable",
+        "uid" : _auth.currentUser!.uid,
       });
       return user;
     } else {
@@ -58,7 +60,7 @@ Future logOut(BuildContext context) async{
 
   try{
     await _auth.signOut().then((user) {
-      Navigator.push(context, MaterialPageRoute(builder: (_) => const LoginScreen()));
+      Navigator.pop(context);
     });
   }catch(e){
     // print("error");

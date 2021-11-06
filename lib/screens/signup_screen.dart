@@ -217,7 +217,7 @@ class _SignUpState extends State<SignUp> {
                   // print("Account is Created");
                   Navigator.pop(context);
                   Navigator.push(context, MaterialPageRoute(builder: (_) => const HomeScreen()));
-                  _showToast(context, "Account is Created, Please Login");
+                  _showToast(context, "Account is Created");
                 } else {
                   // print("Fail to Create Account");
                   _showToast(context, "Fail to Create Account");
