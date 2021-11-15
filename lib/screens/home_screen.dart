@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:group_chat_flutter/controller/account.dart';
 import 'package:group_chat_flutter/screens/chat_room.dart';
+import 'package:group_chat_flutter/screens/group_chats_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({Key? key}) : super(key: key);
@@ -16,7 +17,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   Map<String, dynamic> userMap = <String, dynamic>{};
   final TextEditingController _search = TextEditingController();
   final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore fireStore = FirebaseFirestore.instance;
 
   @override
   void initState() {
@@ -49,7 +50,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
   }
 
   void setStatus(String status) async {
-    await _firestore.collection('user').doc(_auth.currentUser!.uid).update({
+    await fireStore.collection('user').doc(_auth.currentUser!.uid).update({
       "status": status,
     });
   }
@@ -69,7 +70,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
     setState(() {
       isLoading = true;
     });
-    await _firestore
+    await fireStore
         .collection('user')
         .where("email", isEqualTo: _search.text)
         .get()
@@ -151,7 +152,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                           String roomId = chatRoomId(
                               _auth.currentUser!.displayName.toString(),
                               userMap['name']);
-                          print(roomId);
+                          print(userMap['name']);
                           Navigator.of(context).push(MaterialPageRoute(
                               builder: (_) => ChatRoom(
                                     chatRoomId: roomId,
@@ -180,6 +181,14 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
                     : Container(),
               ],
             ),
+      floatingActionButton: FloatingActionButton(
+        child: const Icon(Icons.group),
+        onPressed: () {
+          Navigator.of(context)
+              .push(MaterialPageRoute(builder: (_) => GroupChatScreen()));
+        },
+      ),
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
     );
   }
 }

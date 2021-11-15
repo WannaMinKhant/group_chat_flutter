@@ -37,6 +37,10 @@ dependencies:
   firebase_auth: ^3.1.5
   firebase_core: ^1.9.0
   cloud_firestore: ^3.1.0
+  image_picker: ^0.8.4+4
+  firebase_storage: ^10.1.0
+  uuid: ^3.0.5
+#  google_mobile_ads: ^0.13.6
 
 dev_dependencies:
   flutter_test:
