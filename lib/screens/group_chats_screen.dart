@@ -60,7 +60,7 @@ class _GroupChatScreenState extends State<GroupChatScreen> {
                 return ListTile(
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => GroupChatRoom(),
+                      builder: (_) => GroupChatRoom(groupChatId: groupList[index]['id'],groupName: groupList[index]["name"],),
                     ),
                   ),
                   leading: const Icon(Icons.group),

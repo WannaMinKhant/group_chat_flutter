@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:group_chat_flutter/screens/home_screen.dart';
 import 'package:uuid/uuid.dart';
@@ -15,6 +16,7 @@ class CreateGroup extends StatefulWidget {
 class _CreateGroupState extends State<CreateGroup> {
   TextEditingController groupName = TextEditingController();
   FirebaseFirestore fireStore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   bool isLoading = false;
 
   void createGroup() async {
@@ -40,6 +42,11 @@ class _CreateGroupState extends State<CreateGroup> {
         "id": groupId,
       });
     }
+
+    await fireStore.collection('groups').doc(groupId).collection('chats').add({
+      "message" : "${_auth.currentUser!.displayName} Created this Group.",
+      "type" : "notify",
+    });
     setState(() {
       isLoading = false;
       print("Group Created");

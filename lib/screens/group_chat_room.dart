@@ -1,47 +1,37 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:group_chat_flutter/screens/group_info_screen.dart';
 import 'package:group_chat_flutter/screens/show_image_screen.dart';
 
 class GroupChatRoom extends StatelessWidget {
-  GroupChatRoom({Key? key}) : super(key: key);
+  final String groupChatId;
+  final String groupName;
+
+  GroupChatRoom({Key? key, required this.groupChatId, required this.groupName}) : super(key: key);
 
   final TextEditingController _message = TextEditingController();
-  String currentUserName = "User1";
-  static const List<Map<String, dynamic>> chatList = [
-    {
-      "message": "User1 created this Group",
-      "type": "notify",
-    },
-    {
-      "message": "Hello",
-      "sendBy": "User1",
-      "type": "text",
-    },
-    {
-      "message": "Hello",
-      "sendBy": "User5",
-      "type": "text",
-    },
-    {
-      "message": "Hello",
-      "sendBy": "User3",
-      "type": "text",
-    },
-    {
-      "message": "Hello",
-      "sendBy": "User4",
-      "type": "text",
-    },
-    {
-      "message": "Hello",
-      "sendBy": "User2",
-      "type": "text",
-    },
-    {
-      "message" : "User1 added User8",
-      "type" : "notify",
+  final FirebaseFirestore fireStore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
+  void onSendMessage() async {
+    if (_message.text.isNotEmpty) {
+      Map<String, dynamic> chatData = {
+        "sendBy": _auth.currentUser!.displayName,
+        "message": _message.text,
+        "type": "text",
+        "time": FieldValue.serverTimestamp(),
+      };
+
+      _message.clear();
+
+      await fireStore
+          .collection('group')
+          .doc(groupChatId)
+          .collection('chats')
+          .add(chatData);
     }
-  ];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +43,8 @@ class GroupChatRoom extends StatelessWidget {
         actions: [
           IconButton(
             onPressed: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) => const GroupInfo()));
+              Navigator.of(context)
+                  .push(MaterialPageRoute(builder: (_) => const GroupInfo()));
             },
             icon: const Icon(Icons.more_vert),
           ),
@@ -66,13 +57,28 @@ class GroupChatRoom extends StatelessWidget {
               margin: const EdgeInsets.only(top: 20),
               height: size.height / 1.27,
               width: size.width,
-              child: ListView.builder(
-                shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: chatList.length,
-                  itemBuilder: (context, index) {
-                    return messageTile(size, chatList[index],context);
-                  }),
+              child: StreamBuilder<QuerySnapshot>(
+                stream: fireStore
+                    .collection('groups')
+                    .doc(groupChatId)
+                    .collection('chats')
+                    .orderBy("time", descending: false)
+                    .snapshots(),
+                builder: (context, snapshot) {
+                  if (snapshot.hasData) {
+                    return ListView.builder(
+                        itemCount: snapshot.data!.docs.length,
+                        itemBuilder: (context, index) {
+                          Map<String, dynamic> chatMap =
+                              snapshot.data!.docs[index].data()
+                                  as Map<String, dynamic>;
+                          return messageTile(size, chatMap, context);
+                        });
+                  } else {
+                    return Container();
+                  }
+                },
+              ),
             ),
             Container(
               height: size.height / 10,
@@ -105,7 +111,7 @@ class GroupChatRoom extends StatelessWidget {
                       ),
                     ),
                     IconButton(
-                      onPressed: () {}, //onSendMessage,
+                      onPressed: onSendMessage,
                       icon: const Icon(
                         Icons.send,
                         size: 35,
@@ -122,12 +128,13 @@ class GroupChatRoom extends StatelessWidget {
     );
   }
 
-  Widget messageTile(Size size, Map<String, dynamic> chatMap,BuildContext context) {
+  Widget messageTile(
+      Size size, Map<String, dynamic> chatMap, BuildContext context) {
     return Builder(builder: (_) {
       if (chatMap['type'] == "text") {
         return Container(
           width: size.width,
-          alignment: chatMap['sendBy'] == currentUserName
+          alignment: chatMap['sendBy'] == _auth.currentUser!.displayName
               ? Alignment.centerRight
               : Alignment.centerLeft,
           child: Container(
@@ -173,15 +180,17 @@ class GroupChatRoom extends StatelessWidget {
           height: size.height / 2.5,
           width: size.width,
           padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 10),
-          alignment: chatMap["sendBy"] == currentUserName //_auth.currentUser!.displayName
+          alignment: chatMap["sendBy"] ==
+                  _auth
+                      .currentUser!.displayName //_auth.currentUser!.displayName
               ? Alignment.centerRight
               : Alignment.centerLeft,
           child: InkWell(
             onTap: () {
               Navigator.of(context).push(MaterialPageRoute(
                   builder: (_) => ShowImage(
-                    imageUrl: chatMap['message'],
-                  )));
+                        imageUrl: chatMap['message'],
+                      )));
             },
             child: Container(
               height: size.height / 2.5,
@@ -194,9 +203,9 @@ class GroupChatRoom extends StatelessWidget {
               alignment: chatMap['message'] != "" ? null : Alignment.center,
               child: chatMap["message"] != ""
                   ? Image.network(
-                chatMap['message'],
-                fit: BoxFit.cover,
-              )
+                      chatMap['message'],
+                      fit: BoxFit.cover,
+                    )
                   : const CircularProgressIndicator(),
             ),
           ),
@@ -204,7 +213,7 @@ class GroupChatRoom extends StatelessWidget {
       } else if (chatMap['type'] == "notify") {
         return Container(
           width: size.width,
-          alignment:  Alignment.center,
+          alignment: Alignment.center,
           child: Container(
             padding: const EdgeInsets.symmetric(
               horizontal: 8,
